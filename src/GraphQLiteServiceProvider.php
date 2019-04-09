@@ -3,8 +3,14 @@
 namespace TheCodingMachine;
 
 use Doctrine\Common\Annotations\Reader;
+use function extension_loaded;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
+use Symfony\Component\Lock\Factory as LockFactory;
+use Symfony\Component\Lock\Store\FlockStore;
+use Symfony\Component\Lock\Store\SemaphoreStore;
+use Symfony\Component\Lock\StoreInterface;
+use function sys_get_temp_dir;
 use TheCodingMachine\Funky\Annotations\Factory;
 use TheCodingMachine\Funky\ServiceProvider;
 use TheCodingMachine\GraphQLite\AggregateQueryProvider;
@@ -32,6 +38,7 @@ use TheCodingMachine\GraphQLite\Security\FailAuthenticationService;
 use TheCodingMachine\GraphQLite\Security\FailAuthorizationService;
 use TheCodingMachine\GraphQLite\TypeGenerator;
 use TheCodingMachine\GraphQLite\TypeRegistry;
+use TheCodingMachine\GraphQLite\Types\ArgumentResolver;
 use TheCodingMachine\GraphQLite\Types\TypeResolver;
 
 class GraphQLiteServiceProvider extends ServiceProvider
@@ -64,7 +71,8 @@ class GraphQLiteServiceProvider extends ServiceProvider
         FieldsBuilderFactory $fieldsBuilderFactory,
         RecursiveTypeMapperInterface $recursiveTypeMapper,
         ContainerInterface $container,
-        CacheInterface $cache
+        CacheInterface $cache,
+        LockFactory $lockFactory
     ): array {
         $namespaces = $container->get('graphqlite.namespace.controllers');
         $queryProviders = [];
@@ -75,11 +83,32 @@ class GraphQLiteServiceProvider extends ServiceProvider
                 $fieldsBuilderFactory,
                 $recursiveTypeMapper,
                 $container,
+                $lockFactory,
                 $cache
             );
         }
 
         return $queryProviders;
+    }
+
+    /**
+     * @Factory()
+     */
+    public static function getLockFactory(StoreInterface $store): LockFactory
+    {
+        return new LockFactory($store);
+    }
+
+    /**
+     * @Factory()
+     */
+    public static function getStore(): StoreInterface
+    {
+        if (extension_loaded('sysvsem')) {
+            return new SemaphoreStore();
+        } else {
+            return new FlockStore(sys_get_temp_dir());
+        }
     }
 
     /**
@@ -162,7 +191,8 @@ class GraphQLiteServiceProvider extends ServiceProvider
         AnnotationReader $annotationReader,
         NamingStrategyInterface $namingStrategy,
         CacheInterface $cache,
-        PorpaginasTypeMapper $porpaginasTypeMapper
+        PorpaginasTypeMapper $porpaginasTypeMapper,
+        LockFactory $lockFactory
     ): array {
         $namespaces = $container->get('graphqlite.namespace.types');
         $typeMappers = [];
@@ -176,6 +206,7 @@ class GraphQLiteServiceProvider extends ServiceProvider
                 $container,
                 $annotationReader,
                 $namingStrategy,
+                $lockFactory,
                 $cache
             );
         }
@@ -220,9 +251,9 @@ class GraphQLiteServiceProvider extends ServiceProvider
     public static function getInputTypeGenerator(
         InputTypeUtils $inputTypeUtils,
         FieldsBuilderFactory $fieldsBuilderFactory,
-        HydratorInterface $hydrator
+        ArgumentResolver $argumentResolver
     ): InputTypeGenerator {
-        return new InputTypeGenerator($inputTypeUtils, $fieldsBuilderFactory, $hydrator);
+        return new InputTypeGenerator($inputTypeUtils, $fieldsBuilderFactory, $argumentResolver);
     }
 
     /**
@@ -249,6 +280,14 @@ class GraphQLiteServiceProvider extends ServiceProvider
     public static function getFactoryHydrator(): FactoryHydrator
     {
         return new FactoryHydrator();
+    }
+
+    /**
+     * @Factory()
+     */
+    public static function getArgumentResolver(HydratorInterface $hydrator): ArgumentResolver
+    {
+        return new ArgumentResolver($hydrator);
     }
 
     /**
