@@ -33,7 +33,7 @@ This *service provider* expects the following configuration / services to be ava
 | `graphqlite.namespace.controllers`       | *yes*       | An array containing the namespaces where GraphQL controllers are stored |
 | `graphqlite.namespace.types`       | *yes*       | An array containing the namespaces where GraphQL types are stored |
 | `Psr\SimpleCache\CacheInterface`              | *yes*      | A PSR-16 cache service |
-| `Doctrine\Common\Annotations\Reader`              | *yes*      | A Doctrine annotation reader |
+| `Doctrine\Common\Annotations\Reader`              | *no*      | A Doctrine annotation reader |
 | `TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface`              | *no*      | A service to plug authentication to GraphQLite. If not passed, the `FailAuthenticationService` is used instead. |
 | `TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface`              | *no*      | A service to plug authorization to GraphQLite. If not passed, the `FailAuthorizationService` is used instead. |
 
