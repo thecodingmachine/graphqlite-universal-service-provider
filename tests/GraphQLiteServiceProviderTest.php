@@ -4,6 +4,7 @@ namespace TheCodingMachine;
 
 use PHPUnit\Framework\TestCase;
 use Simplex\Container;
+use TheCodingMachine\GraphQLite\Http\WebonyxGraphqlMiddleware;
 use TheCodingMachine\GraphQLite\Schema;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
@@ -25,5 +26,8 @@ class GraphQLiteServiceProviderTest extends TestCase
 
         $schema = $container->get(Schema::class);
         $this->assertInstanceOf(Schema::class, $schema);
+
+        $middleware = $container->get(WebonyxGraphqlMiddleware::class);
+        $this->assertInstanceOf(WebonyxGraphqlMiddleware::class, $middleware);
     }
 }
