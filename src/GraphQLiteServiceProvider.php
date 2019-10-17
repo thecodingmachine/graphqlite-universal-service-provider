@@ -3,6 +3,7 @@
 namespace TheCodingMachine;
 
 use Doctrine\Common\Annotations\Reader;
+use Psr\Http\Server\MiddlewareInterface;
 use TheCodingMachine\GraphQLite\Http\Psr15GraphQLMiddlewareBuilder;
 use TheCodingMachine\GraphQLite\Http\WebonyxGraphqlMiddleware;
 use function extension_loaded;
@@ -112,9 +113,9 @@ class GraphQLiteServiceProvider extends ServiceProvider
     }
 
     /**
-     * @Factory(tags={@Tag(name=MiddlewareListServiceProvider::MIDDLEWARES_QUEUE, priority=MiddlewareOrder::ROUTER)})
+     * @Factory(name=WebonyxGraphqlMiddleware::class,tags={@Tag(name=MiddlewareListServiceProvider::MIDDLEWARES_QUEUE, priority=MiddlewareOrder::ROUTER)})
      */
-    public static function getMiddleware(Psr15GraphQLMiddlewareBuilder $builder): WebonyxGraphqlMiddleware
+    public static function getMiddleware(Psr15GraphQLMiddlewareBuilder $builder): MiddlewareInterface
     {
         return $builder->createMiddleware();
     }
