@@ -11,7 +11,7 @@
   "require": {
     "php": ">=7.1",
     "thecodingmachine/funky": "^1",
-    "thecodingmachine/graphqlite": "~4.0.0",
+    "thecodingmachine/graphqlite": "~4.0.0 || ~4.1.0",
     "thecodingmachine/doctrine-annotations-universal-module": "^1.1",
     "zendframework/zend-diactoros": "^2",
     "thecodingmachine/middleware-list-universal-module": "^1.0"
